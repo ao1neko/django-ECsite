@@ -1,0 +1,42 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}日記詳細 | Private Diary{% endblock %}
+
+{% block active_profile %}active{% endblock %}
+
+
+{% block contents %}
+<div class="container">
+    <div class="my-div-style w-100">
+        <div class="row">
+            <div class="col-3">
+                <strong>タイトル</strong>
+            </div>
+            <div class="col-9">
+                {{ user.username }}
+            </div>
+        </div>
+
+        <hr>
+
+        <div class="row">
+            <div class="col-3">
+                <strong>本文</strong>
+            </div>
+            <div class="col-9">
+                {{ user.profile_text|linebreaksbr }}
+            </div>
+        </div>
+        <div class="clearfix">
+            <a class="btn btn-primary float-right" href="{% url 'ecsitecore:profile-updates' user.username %}">更新</a>
+        </div>
+        <p></p>
+        {% if user.company_or_individual == "company" %}
+        <div class="clearfix">
+            <a class="btn btn-primary float-right" href="{% url 'ecsitecore:profile-inquiries' %}">権限作成</a>
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

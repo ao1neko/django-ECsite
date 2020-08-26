@@ -49,6 +49,7 @@ INSTALLED_APPS = [
     'axes',
     
     'django_elasticsearch_dsl',
+    'django_extensions',
 ]
 
 MIDDLEWARE = [
