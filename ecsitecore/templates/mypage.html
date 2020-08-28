@@ -13,35 +13,41 @@
 <div class="container">
     <div class="row">
         <div class="my-div-style w-100">
-            <div class="col-lg-8 col-md-10 mx-auto">
+            <h2>お気に入り</h2>
+            <hr>
                 {% for library in library_list %}
-                    <div class="post-preview">
+                    <div class="row">
+                        
+                        <div class="col-3">
+                        <a href="{% url 'ecsitecore:commodity-detail' library.commodity.pk %}">
+                            <img src="{{ library.commodity.photo.url }}" width="150" height="150"/>
+                        </a>
+                        </div>
+                        <div class="col-6">
                         <a href="{% url 'ecsitecore:commodity-detail' library.commodity.pk %}">
                           <h2 class="post-title">
                             {{ library.commodity.title }}
                           </h2>
-                          <h3 class="post-subtitle">
-                            {{ library.commodity.content|truncatechars:20 }}
-                          </h3>
+                          <h4 class="post-subtitle">
+                            {{ library.commodity.price }}円
+                          </h4>
                         </a>
+                    </div>
+                        <form method="POST">
+                            {% csrf_token %}
+                          <button class="btn btn-primary mt-5 mb-3" name="delete-button" type="submit" value="{{library.pk}}">削除</button>
+                        </form>
                     </div>
                     <hr>
                 {% empty %}
-                    <p>日記がありません。</p>
+                    <p>お気に入りがありません。</p>
                 {% endfor %}
-                <hr>
+                <p></p>
+                <h2>取引り履歴</h2>
                 {% for transaction in transaction_list %}
-                <div class="post-preview">
-                      <h2 class="post-title">
-                        {{ transaction.commodity.title }}
-                      </h2>
-                      <h3 class="post-subtitle">
-                        {{ transaction.commodity.content|truncatechars:20 }}
-                      </h3>
-                </div>
-                <hr>
+                      <p >{{transaction.created_at}}: {{ transaction.commodity.title }} {{ transaction.commodity.price }}円×{{transaction.num}}個</p>
                 {% empty %}
-                    <p>日記がありません。</p>
+                    <p>取引がありません。</p>
                 {% endfor %}
                 <!-- ページネーション処理 -->
                 {% if is_paginated %}
@@ -75,7 +81,7 @@
                     </ul>
                 {% endif %}
             </div>
-        </div>
+        
     </div>
 </div>
 {% endblock %}

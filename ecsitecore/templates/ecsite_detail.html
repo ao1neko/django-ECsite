@@ -3,7 +3,7 @@
 
 {% block title %}日記詳細 | Private Diary{% endblock %}
 
-{% block active_commodity_list %}active{% endblock %}
+{% block active_ecsite_list %}active{% endblock %}
 
 
 {% block contents %}
@@ -11,29 +11,37 @@
     <div class="my-div-style w-100">
         <div class="row">
             <div class="col-3">
-                <strong>タイトル</strong>
+                <strong>商品名</strong>
             </div>
             <div class="col-9">
                 {{ object.title }}
             </div>
         </div>
-
         <hr>
-
         <div class="row">
             <div class="col-3">
-                <strong>本文</strong>
+                <strong>値段</strong>
+            </div>
+            <div class="col-9">
+                {{ object.price }}円
+            </div>
+        </div>
+        <hr>
+        <div class="row">
+            <div class="col-3">
+                <strong>商品概要</strong>
             </div>
             <div class="col-9">
                 {{ object.content|linebreaksbr }}
             </div>
         </div>
 
+
         <hr>
 
         <div class="row">
             <div class="col-3">
-                <strong>写真</strong>
+                <strong>サンプル写真</strong>
             </div>
             <div class="col-3">
                 {% if object.photo %}
@@ -41,7 +49,57 @@
                 {% endif %}
             </div>
         </div>
-      <a class="btn btn-success mt-5 mb-3" href="{% url 'ecsitecore:transaction' %}">購入</a> 
+        <hr>
+        <form method="POST">
+            {% csrf_token %}
+            {{ form.non_field_errors }}
+
+            {% for field in form %}
+                <div class="form-group row">
+                    <label for="{{ field.id_for_label }}" class="col-sm-3 col-form-label">
+                        <strong>{{ field.label_tag }}</strong>
+                    </label>
+                    <div class="col-sm-3">
+                        {{ field }}
+                        {{ field.errors }}
+                    </div>
+                </div>
+            {% endfor %}
+
+      <button class="btn btn-success mt-5 mb-3" name="cart-button" href="" type="submit">カートに入れる数量を選択</button> 
+      <button class="btn btn-success mt-5 mb-3" name="library-button" href="" type="submit">お気に入り</button> 
+      {% if object.user == user %}
+
+      <a class="btn btn-primary float-right mt-5 "  href="{% url 'ecsitecore:ecsite-update' object.pk %}">更新</a>
+      
+      <button class="btn btn-primary float-right mt-5 mr-2" href="" name="delete-button" type="submit">削除</button>
+     
+      {% endif %}
+    </form>
+     
+
+      <h2>レビュー</h2>
+      <form action="" method="POST">
+        {% csrf_token %}
+        {{ review_form.non_field_errors }}
+        <div class="form-group">
+          {{ review_form.as_p }}
+        </div>
+      <button class="btn btn-success mt-5 mb-3" name="review-button" href="" type="submit">レビュー登録</button> 
+      </form>
+      {% for review in review_list %}
+      <p>score: {{review.score}}       {{ review.user.username }}: {{review.content}}</p>
+        {% if user == review.user %}
+        <form method="POST">
+            {% csrf_token %}
+          <div class="clearfix">
+          <button class="btn btn-primary float-right" href="" name="delete-review-button" type="submit" value="{{review.pk}}">削除</button>
+          </div>
+        </form>
+        {% endif %}
+        {% empty %}
+            <p>レビューがありません。</p>
+        {% endfor %}
     </div>
 </div>
 {% endblock %}

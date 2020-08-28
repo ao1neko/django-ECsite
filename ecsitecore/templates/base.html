@@ -36,8 +36,14 @@
             </button>
             <div class="collapse navbar-collapse" id="navbarResponsive">
               <ul class="navbar-nav mr-auto">
+
                 <li class="nav-item {% block active_ecsite_list %}{% endblock %}">
                   <a class="nav-link" href="{% url 'ecsitecore:commodity-list' %}">LIST</a>
+                </li>
+
+                
+                <li class="nav-item {% block active_transaction %}{% endblock %}">
+                  <a class="nav-link" href="{% url 'ecsitecore:transaction' %}">CART</a>
                 </li>
                 {% if user.is_authenticated and user.company_or_individual == "company" %}
                 <li class="nav-item {% block active_ecsite_mylist %}{% endblock %}">

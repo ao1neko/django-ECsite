@@ -49,7 +49,8 @@ INSTALLED_APPS = [
     'axes',
     
     'django_elasticsearch_dsl',
-    'django_extensions',
+    'django_extensions',#runscript
+    'stripe',
 ]
 
 MIDDLEWARE = [
@@ -223,6 +224,11 @@ MEDIA_URL = '/media/'
 
 #debugtool用
 INTERNAL_IPS = ['127.0.0.1']
+
+
+STRIPE_PUBLIC_KEY=os.environ.get('STRIPE_PUBLIC_KEY')
+STRIPE_SECRET_KEY=os.environ.get('STRIPE_SECRET_KEY')
+
 
 #auth_password_validatorsで利用可能なパスワードの規則定義
 #E-mail用バックエンド

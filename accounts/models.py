@@ -43,7 +43,7 @@ class CustomUser(AbstractUser):
         max_length=255,
         unique=True,
     )
-    profile_text = models.TextField(verbose_name='本文', blank=True, null=True)
+    profile_text = models.TextField(verbose_name='本文', default="")
     company_or_individual = models.CharField(verbose_name='会社', max_length=40,default='individual')#デフォルト指定
 
 

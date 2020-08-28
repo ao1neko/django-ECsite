@@ -11,25 +11,53 @@
 
 {% block contents %}
 <div class="container">
-    <div class="row">
-        <div class="my-div-style w-100">
-            <div class="col-lg-8 col-md-10 mx-auto">
-                {% for commodity in commodity_list %}
-                    <div class="post-preview">
-                        <a href="{% url 'ecsitecore:commodity-detail' commodity.pk %}">
-                          <h2 class="post-title">
-                            {{ commodity.title }}
-                          </h2>
-                          <h3 class="post-subtitle">
-                            {{ commodity.content|truncatechars:20 }}
-                          </h3>
-                        </a>
+        <div class="my-div-style">
+            <form method="POST">
+                {% csrf_token %}
+                <div class="row">
+                <div class="col-8">
+                <input type="text" class="form-control form-control-lg" placeholder="" name="search-text">
+                </div>
+                <div class="col-2">
+                    <button class="btn btn-primary" type="submit"  aria-haspopup="true" aria-expanded="false" name="search-button">search</button>
+                </div>
+            
+                <div class="dropdown col-2">
+                    <button class="btn btn-primary dropdown-toggle" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                      一覧表示
+                    </button>
+                    <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
+                      <button class="dropdown-item" name="time-button">新着順</button>
+                      <button class="dropdown-item" name="price-button">価格順</button>
+                      <button class="dropdown-item" name="order-button">注文数順</button>
+                      <button class="dropdown-item" name="score-button">スコア順</button>
                     </div>
-                    <hr>
-                {% empty %}
-                    <p>日記がありません。</p>
-                {% endfor %}
+                  </div>
+                </div>
+            </form>
+                {% for commodity in mycommodity_list %}
+                <div class="row">
+                        <div class="col-3">
+                            <a href="{% url 'ecsitecore:commodity-detail' commodity.pk %}">
+                                <img src="{{ commodity.photo.url }}" width="150" height="150"/>
+                            </a>
+                        </div>
+                        <div class="col-6">
+                            <a href="{% url 'ecsitecore:commodity-detail' commodity.pk %}">
+                            <h2 class="post-title">
+                                {{ commodity.title}}
+                            </h2>
+                            <h4 class="post-subtitle">
+                                {{commodity.price}}円
+                            </h4>
+                        </a>
 
+                        </div>
+                </div>
+                <hr>
+                {% empty %}
+                    <p>商品がありません。</p>
+                {% endfor %}
                 <!-- ページネーション処理 -->
                 {% if is_paginated %}
                     <ul class="pagination">
@@ -62,7 +90,6 @@
                     </ul>
                 {% endif %}
             </div>
-        </div>
-    </div>
+
 </div>
 {% endblock %}
