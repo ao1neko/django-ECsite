@@ -41,14 +41,14 @@ INSTALLED_APPS = [
     'accounts.apps.AccountsConfig',
     'ecsitecore.apps.EcsitecoreConfig',
     'debug_toolbar',
+    'django_elasticsearch_dsl',
+
 
     #アカウント管理
     'django.contrib.sites',
     'allauth',
     'allauth.account',
     'axes',
-    
-    'django_elasticsearch_dsl',
     'django_extensions',#runscript
     'stripe',
 ]

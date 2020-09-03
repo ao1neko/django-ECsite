@@ -40,6 +40,7 @@ class CommodityListView(generic.TemplateView):
         word=self.request.session.pop('words', None)
         self.request.session['words_store']=word
         type=self.request.session.pop('types',None)
+        
         if word==None:
             if type==None or type=="time":
                 context['mycommodity_list'] =  Commodity.objects.filter(is_active="active").order_by('-created_at')
