@@ -41,7 +41,6 @@ INSTALLED_APPS = [
     'accounts.apps.AccountsConfig',
     'ecsitecore.apps.EcsitecoreConfig',
     'debug_toolbar',
-    'django_elasticsearch_dsl',
 
 
     #アカウント管理
@@ -100,12 +99,6 @@ DATABASES = {
     },
 }
 
-#elasticsearch
-ELASTICSEARCH_DSL={
-    'default': {
-        'hosts': 'localhost:9200'
-    },
-}
 
 
 CACHES = {

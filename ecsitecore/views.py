@@ -8,12 +8,15 @@ from django.shortcuts import redirect, render
 from django.template import RequestContext
 from django.core.validators import RegexValidator
 
-
+#TODO　elasticsearchコピー
+from .myfunctions import button_type_redirect
+from .elasticsearch.commoditydoc import CommodityDoc
+from .elasticsearch.db_functions import *
 from .forms import CommodityCreateForm, CompanyCreateForm, UserCreateForm, CartCreateForm, ReviewCreateForm
 from .models import Commodity, CustomUser, Transaction, Library,Cart, Review
 
 
-
+commoditydoc = CommodityDoc()
 logger = logging.getLogger(__name__)
 
 class HomeView(generic.TemplateView):
@@ -40,6 +43,7 @@ class CommodityListView(generic.TemplateView):
         word=self.request.session.pop('words', None)
         self.request.session['words_store']=word
         type=self.request.session.pop('types',None)
+
         
         if word==None:
             if type==None or type=="time":
@@ -57,21 +61,13 @@ class CommodityListView(generic.TemplateView):
     
     def post(self, request, *args, **kwargs):
         if 'time-button' in request.POST:
-            request.session['words'] = request.session.pop('words_store',None)
-            request.session['types']='time'
-            return redirect('ecsitecore:commodity-list')   
+            return button_type_redirect(request,"time")
         elif 'price-button' in request.POST:
-            request.session['words'] = request.session.pop('words_store',None)
-            request.session['types']='price'
-            return redirect('ecsitecore:commodity-list')   
+            return button_type_redirect(request,"price")
         elif 'order-button' in request.POST:
-            request.session['words'] = request.session.pop('words_store',None)
-            request.session['types']='order'
-            return redirect('ecsitecore:commodity-list')   
+            return button_type_redirect(request,"order")
         elif 'score-button' in request.POST:
-            request.session['words'] = equest.session.pop('words_store',None)
-            request.session['types']='score'
-            return redirect('ecsitecore:commodity-list')   
+            return button_type_redirect(request,"score")
         elif 'search-button' in request.POST:
             request.session['words'] =request.POST['search-text'] 
             request.session.pop('words_store',None)
@@ -82,9 +78,6 @@ class CommodityListView(generic.TemplateView):
 
 
 
-
-#TODO:postコピー
-#TODO:検索結果 順
 class commodityDetailView(generic.DetailView, generic.FormView,generic.edit.ModelFormMixin):
     model = Commodity
     template_name = 'ecsite_detail.html'
@@ -92,7 +85,7 @@ class commodityDetailView(generic.DetailView, generic.FormView,generic.edit.Mode
 
     def post(self, request, *args, **kwargs):
         if 'delete-button' in request.POST:
-            Commodity.objects.filter(pk=self.kwargs['pk']).update(is_active="not_active")
+            update_db(Commodity.objects.filter(pk=self.kwargs['pk']),commoditydoc,[("is_active","not_active")],is_active="not_active")
             messages.success(self.request, '商品を削除しました。')
             return redirect('ecsitecore:ecsite-mylist')   
         elif 'delete-review-button' in request.POST:
