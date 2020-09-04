@@ -6,12 +6,16 @@ import argparse
 import inspect
 from .myelasticsearch import MyElasticSearch
 
+
 def convert_dbto_elastic(Class,object,fileds):
     myjson={}
     for filed in fileds:
         model_filed_class = Class._meta.get_field(filed).__class__.__name__
-        if model_filed_class == "CharField" or model_filed_class == 'TextField' or  model_filed_class == 'IntegerField' or  model_filed_class == 'ImageField':
+        if model_filed_class == "CharField" or model_filed_class == 'TextField' or  model_filed_class == 'IntegerField':
             myjson[filed] = object.__dict__[filed]    
+        elif model_filed_class == 'ImageField':
+            myjson[filed] = '/media/'+ object.__dict__[filed]  
+
         elif model_filed_class == 'DateTimeField':
             time = object.__dict__[filed]
             myjson[filed] = time.strftime('%Y-%m-%dT%H:%M:%S')
@@ -21,7 +25,7 @@ def convert_dbto_elastic(Class,object,fileds):
     return myjson
 
 
-def method_db(es,fields,object_list,method):
+def method_db(es,object_list,method,**kwargs):
     bulk_list=[]
     index_name=es.index_name
     for i in object_list :
@@ -30,23 +34,15 @@ def method_db(es,fields,object_list,method):
         tmp['index_name']=index_name
         tmp['id']=i
         doc={}
-        for f in fields:
-            doc[f[0]]=f[1]
+        for k,v in kwargs.items():
+            doc[k]=v
         tmp['doc']=doc
         bulk_list.append(tmp)
     es.bulk(bulk_list)
 
-
-def create_db(Class,es,fields,**kwargs):
+def update_db(objects,es,fields,**kwargs):
     objects.update(**kwargs)
     object_list = objects.values_list('id', flat=True)
-    method_db(es,fields,object_list,"create")
+    method_db(es,object_list,"update",**kwargs)
 
-
-def update_db(objects,es,fields,**kwargs):
-    #objects.update(**kwargs)
-    for k in kwargs:
-        print(k)
-    object_list = objects.values_list('id', flat=True)
-    method_db(es,fields,object_list,"update")
 

@@ -6,6 +6,20 @@ import inspect
 from .myelasticsearch import MyElasticSearch
 
 class CommodityDoc(MyElasticSearch):
+    created_at={
+        "created_at":{
+            "order":"desc"
+        }
+    }
+    price={
+        "price":{
+            "order":"asc"
+        }
+    }
+
+
+
+    
     def __init__(self):
         self.mappings = {"properties": {}}
         super().__init__(index_name="commodity")
@@ -49,11 +63,15 @@ class CommodityDoc(MyElasticSearch):
         myjson={}
         for model_filed in model_fileds:
             model_filed_class=model_class._meta.get_field(model_filed).__class__.__name__
-            if model_filed_class == "CharField" or model_filed_class == 'TextField' :
+            if model_filed_class == 'TextField' :
                 tmp={}
                 tmp['type']='text'
                 tmp['analyzer']='my_analyzer'
                 tmp['fielddata']=True
+                myjson[str(model_filed)]=tmp
+            elif model_filed_class == "CharField" :
+                tmp={}
+                tmp['type']='keyword'
                 myjson[str(model_filed)]=tmp
             elif model_filed_class == 'ImageField' :
                 tmp={}
@@ -77,8 +95,21 @@ class CommodityDoc(MyElasticSearch):
     def insert_document(self,doc,id=None,):
         super().insert_document(doc=doc,id=id,)
 
-    def search(self,query):
-        super().search(query=query)
+    def search(self,sort=created_at):
+        query={
+            "query": {
+                "bool":{
+                    "filter":{
+                        "term":{
+                            "is_active":"active"
+                        }
+                    }
+                }
+            },
+            "sort":sort
+        }
+        res = super().search(query=query)
+        return res["hits"]['hits']
     
 
 
@@ -95,4 +126,6 @@ if __name__ == '__main__':
     elif args.args == 'create_index':
         commoditydoc.create_index()
         print('create index')
+    elif args.args == 'analyzer_check':
+        commoditydoc.analyze_test("my_analyzer","猫に小判")
 

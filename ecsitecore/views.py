@@ -9,7 +9,7 @@ from django.template import RequestContext
 from django.core.validators import RegexValidator
 
 #TODO　elasticsearchコピー
-from .myfunctions import button_type_redirect
+from .myfunctions import *
 from .elasticsearch.commoditydoc import CommodityDoc
 from .elasticsearch.db_functions import *
 from .forms import CommodityCreateForm, CompanyCreateForm, UserCreateForm, CartCreateForm, ReviewCreateForm
@@ -44,16 +44,15 @@ class CommodityListView(generic.TemplateView):
         self.request.session['words_store']=word
         type=self.request.session.pop('types',None)
 
-        
         if word==None:
             if type==None or type=="time":
-                context['mycommodity_list'] =  Commodity.objects.filter(is_active="active").order_by('-created_at')
+                context['mycommodity_list'] =  change_hits_list(commoditydoc.search())
             elif type == 'price':
-                context['mycommodity_list'] =  Commodity.objects.filter(is_active="active").order_by('-created_at').reverse()
+                context['mycommodity_list'] =  change_hits_list(commoditydoc.search(sort=CommodityDoc.price))
             elif type == 'order':
-                context['mycommodity_list'] =  Commodity.objects.filter(is_active="active").order_by('-created_at')
+                context['mycommodity_list'] =  change_hits_list(commoditydoc.search())    
             elif type == 'score':
-                context['mycommodity_list'] =  Commodity.objects.filter(is_active="active").order_by('-created_at')
+                context['mycommodity_list'] =  change_hits_list(commoditydoc.search())
         else:
             context['mycommodity_list'] = Commodity.objects.filter(is_active="active", title=word).order_by('-created_at')
         return context

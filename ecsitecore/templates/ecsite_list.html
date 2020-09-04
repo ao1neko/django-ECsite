@@ -38,17 +38,17 @@
                 {% for commodity in mycommodity_list %}
                 <div class="row">
                         <div class="col-3">
-                            <a href="{% url 'ecsitecore:commodity-detail' commodity.pk %}">
-                                <img src="{{ commodity.photo.url }}" width="150" height="150"/>
+                            <a href="{% url 'ecsitecore:commodity-detail' commodity.id %}">
+                                <img src="{{ commodity.source.photo }}" width="150" height="150"/>
                             </a>
                         </div>
                         <div class="col-6">
-                            <a href="{% url 'ecsitecore:commodity-detail' commodity.pk %}">
+                            <a href="{% url 'ecsitecore:commodity-detail' commodity.id %}">
                             <h2 class="post-title">
-                                {{ commodity.title}}
+                                {{ commodity.source.title}}
                             </h2>
                             <h4 class="post-subtitle">
-                                {{commodity.price}}円
+                                {{commodity.source.price}}円
                             </h4>
                         </a>
 

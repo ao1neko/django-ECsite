@@ -33,7 +33,8 @@ class MyElasticSearch():
         print(res['result'])
 
     def search(self,query={"query": {"match_all": {}}}):
-        return self.es.search(index=self.index_name, body=query)
+        res = self.es.search(index=self.index_name, body=query)
+        return res
         #print(res['hits']['total'])#ヒット数
         
 
