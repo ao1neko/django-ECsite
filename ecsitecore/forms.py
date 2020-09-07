@@ -1,7 +1,7 @@
 from django import forms
 from django.core.mail import EmailMessage
 
-from .models import Commodity,Company,CustomUser, Cart, Review
+from .models import Company,CustomUser, Cart, Review
 
 
 #フォームをモデルから作成
@@ -17,11 +17,12 @@ class UserCreateForm(forms.ModelForm):
 
 
 #フォームをモデルから作成
-class CommodityCreateForm(forms.ModelForm):
-    class Meta:
-        model = Commodity
-        fields = ("title", "content", "photo", "price") 
-
+class CommodityCreateForm(forms.Form):
+    title = forms.CharField(label='商品名', max_length=40)
+    content = forms.CharField(label='商品概要',widget=forms.Textarea )
+    photo = forms.ImageField(label='写真', )
+    price = forms.IntegerField(label='値段', )
+   
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         for field in self.fields.values():

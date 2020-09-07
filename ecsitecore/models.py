@@ -3,32 +3,9 @@ from django.db import models
 from accounts.models import CustomUser
 from django.core.validators import MaxValueValidator, MinValueValidator, RegexValidator
 
-class Commodity(models.Model):
-    ACTIVE = (
-        ('Y', 'active'),
-        ('N', 'not_active'),
-    )
-    user = models.ForeignKey(CustomUser, verbose_name='ユーザー', on_delete=models.PROTECT)#多対一
-    title = models.CharField(verbose_name='商品名', max_length=40)
-    content = models.TextField(verbose_name='商品概要', blank=True, null=True)
-    photo = models.ImageField(verbose_name='写真', blank=True, null=True)
-    price = models.IntegerField(verbose_name='値段', )
-    order = models.IntegerField(verbose_name='注文数',default=0)
-    score = models.FloatField(verbose_name='スコア',default=3.0)
-    is_active =  models.CharField(verbose_name='有効', max_length=40, choices=ACTIVE)
-    created_at = models.DateTimeField(verbose_name='作成日時', blank=True, null=True, auto_now_add=True)
-    updated_at = models.DateTimeField(verbose_name='作成日時', blank=True, null=True, auto_now=True)
-
-    class Meta:
-        verbose_name_plural = '商品'
-
-    #クラスを参照時に返したい文字列
-    def __str__(self):
-        return self.title
-
 class Transaction(models.Model):
     user = models.ForeignKey(CustomUser, verbose_name='ユーザー', on_delete=models.PROTECT)#多対一
-    commodity = models.ForeignKey(Commodity, verbose_name='商品', on_delete=models.PROTECT)#多対一
+    commoditykey = models.IntegerField(verbose_name='商品番号')
     created_at = models.DateTimeField(verbose_name='作成日時', blank=True, null=True, auto_now_add=True)
     num=models.IntegerField(verbose_name="数量", default=1)
 
@@ -41,7 +18,7 @@ class Transaction(models.Model):
 
 class Review(models.Model):
     user = models.ForeignKey(CustomUser, verbose_name='ユーザー', on_delete=models.PROTECT)#多対一
-    commodity = models.ForeignKey(Commodity, verbose_name='商品', on_delete=models.PROTECT)#多対一
+    commoditykey = models.IntegerField(verbose_name='商品番号')
     content = models.TextField(verbose_name='内容', default="")
     score = models.IntegerField(verbose_name='スコア',validators=[MinValueValidator(1), MaxValueValidator(5)],default=3)
     created_at = models.DateTimeField(verbose_name='作成日時', blank=True, null=True, auto_now_add=True)
@@ -55,7 +32,7 @@ class Review(models.Model):
 
 class Cart(models.Model):
     user = models.ForeignKey(CustomUser, verbose_name='ユーザー', on_delete=models.PROTECT)#多対一
-    commodity = models.ForeignKey(Commodity, verbose_name='商品', on_delete=models.PROTECT)#多対一
+    commoditykey = models.IntegerField(verbose_name='商品番号')
     num = models.IntegerField(verbose_name='数量', default=0)
     
     class Meta:
@@ -64,8 +41,8 @@ class Cart(models.Model):
 
 class Library(models.Model):
     user = models.ForeignKey(CustomUser, verbose_name='ユーザー', on_delete=models.PROTECT)#多対一
-    commodity = models.ForeignKey(Commodity, verbose_name='商品', on_delete=models.PROTECT)#多対一
-    
+    commoditykey = models.IntegerField(verbose_name='商品番号')
+
     class Meta:
         verbose_name_plural = 'お気に入り'
     

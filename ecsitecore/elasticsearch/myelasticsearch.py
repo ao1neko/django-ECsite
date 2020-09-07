@@ -14,7 +14,6 @@ class MyElasticSearch():
         self.es.indices.close(index=self.index_name)
         self.es.indices.put_mapping(index=self.index_name, body=mappings)
         self.es.indices.open(index=self.index_name)
-        
 
     def delete_index(self):
         self.es.indices.delete(index=self.index_name)
@@ -23,14 +22,21 @@ class MyElasticSearch():
         res = self.es.indices.exists(index=self.index_name)
         return res #bool値
     
-    def delete_document(self,id=1):
-        res = self.es.delete(index=self.index_name, id=id)
-        print(res['result'])
+    def get_document(self,id):
+        res = self.es.get(index=self.index_name, id=id)
+        return res['result']
 
+    def delete_document(self,id):
+        res = self.es.delete(index=self.index_name, id=id)
+        return res['result']
 
     def insert_document(self,doc,id=None):
         res = self.es.index(index=self.index_name,body=doc,id=id)
-        print(res['result'])
+        return res['result']
+
+    def update_document(self,doc,id):
+        res = self.es.update(index=self.index_name,body=doc,id=id)
+        return res['result']
 
     def search(self,query={"query": {"match_all": {}}}):
         res = self.es.search(index=self.index_name, body=query)
@@ -40,11 +46,11 @@ class MyElasticSearch():
 
     def show_indexies(self):
         res=self.es.indices.get_alias()
-        print(res)
+        return res
 
     def analyze_test(self,analyzer,text):
         res=self.es.indices.analyze(body={"analyzer": analyzer,"text": text},index=self.index_name)
-        print(res)
+        return res
 
 
     #bulk
