@@ -1,4 +1,3 @@
-#TODO DBとelasticsearch同期させる関数
 from datetime import datetime
 from elasticsearch import Elasticsearch
 import sys
@@ -11,7 +10,7 @@ def convert_dbto_elastic(Class,object,fileds):
     myjson={}
     for filed in fileds:
         model_filed_class = Class._meta.get_field(filed).__class__.__name__
-        if model_filed_class == "CharField" or model_filed_class == 'TextField' or  model_filed_class == 'IntegerField':
+        if model_filed_class == "CharField" or model_filed_class == 'TextField' or  model_filed_class == 'IntegerField' or model_filed_class=='FloatField':
             myjson[filed] = object.__dict__[filed]    
         elif model_filed_class == 'ImageField':
             myjson[filed] = '/media/'+ object.__dict__[filed]  

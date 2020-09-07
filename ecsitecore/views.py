@@ -43,18 +43,18 @@ class CommodityListView(generic.TemplateView):
         word=self.request.session.pop('words', None)
         self.request.session['words_store']=word
         type=self.request.session.pop('types',None)
-
+        print(word,type)
         if word==None:
             if type==None or type=="time":
                 context['mycommodity_list'] =  change_hits_list(commoditydoc.search())
             elif type == 'price':
                 context['mycommodity_list'] =  change_hits_list(commoditydoc.search(sort=CommodityDoc.price))
             elif type == 'order':
-                context['mycommodity_list'] =  change_hits_list(commoditydoc.search())    
+                context['mycommodity_list'] =  change_hits_list(commoditydoc.search(sort=CommodityDoc.order))    
             elif type == 'score':
-                context['mycommodity_list'] =  change_hits_list(commoditydoc.search())
+                context['mycommodity_list'] =  change_hits_list(commoditydoc.search(sort=CommodityDoc.score))
         else:
-            context['mycommodity_list'] = Commodity.objects.filter(is_active="active", title=word).order_by('-created_at')
+            context['mycommodity_list'] =  change_hits_list(commoditydoc.search(sort=CommodityDoc.score,word=word))
         return context
 
     
@@ -124,6 +124,8 @@ class commodityDetailView(generic.DetailView, generic.FormView,generic.edit.Mode
                 # 保存
                 rform_query.save()
             else:
+                score=Review.objects.filter(commodity=c).aggregate(Avg('score'))
+                Commodity.objects.get(id=self.kwargs['pk']).update(score=score)
                 messages.error(self.request, 'スコアは1~5の値を入力して下さい')
                 return redirect(reverse_lazy('ecsitecore:commodity-detail', kwargs={'pk': self.kwargs['pk']}))
             messages.success(self.request, 'レビューを追加しました。')
@@ -197,9 +199,12 @@ class TransactionsView(LoginRequiredMixin, generic.ListView):
                 return render(request, 'ecsitecore/transaction.html', context)
             else:
                 # 上手く購入できた。Django側にも購入履歴を入れておく
+                #TODO テスト
                 tmp=Cart.objects.filter(user=self.request.user)
                 for carti in tmp:
                     Transaction.objects.create(user=request.user,commodity=carti.commodity, num=carti.num)
+                    commodity=Commodity.objects.get(commodity=carti.commodity)
+                    commodity.update(order=commodity.order+carti.num)
                 tmp.delete()
                 return redirect('ecsitecore:commodity-list')
 

@@ -3,7 +3,6 @@ from django.db import models
 from accounts.models import CustomUser
 from django.core.validators import MaxValueValidator, MinValueValidator, RegexValidator
 
-#TODO mapping自動生成,データ挿入script書く
 class Commodity(models.Model):
     ACTIVE = (
         ('Y', 'active'),
@@ -14,6 +13,8 @@ class Commodity(models.Model):
     content = models.TextField(verbose_name='商品概要', blank=True, null=True)
     photo = models.ImageField(verbose_name='写真', blank=True, null=True)
     price = models.IntegerField(verbose_name='値段', )
+    order = models.IntegerField(verbose_name='注文数',default=0)
+    score = models.FloatField(verbose_name='スコア',default=3.0)
     is_active =  models.CharField(verbose_name='有効', max_length=40, choices=ACTIVE)
     created_at = models.DateTimeField(verbose_name='作成日時', blank=True, null=True, auto_now_add=True)
     updated_at = models.DateTimeField(verbose_name='作成日時', blank=True, null=True, auto_now=True)

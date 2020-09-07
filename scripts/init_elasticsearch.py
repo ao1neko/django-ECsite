@@ -11,7 +11,7 @@ def run():
     commoditydoc.create_index()
     print("remake index")
     #forenkeyは使えない
-    model_list=(Commodity,['id','title','content','photo','price','is_active','created_at','updated_at'])
+    model_list=(Commodity,['id','title','content','photo','price',"order",'is_active','created_at','updated_at'])
     commoditydoc.set_mapping(model_list=model_list)
     print("change mapping")
     

@@ -16,6 +16,16 @@ class CommodityDoc(MyElasticSearch):
             "order":"asc"
         }
     }
+    order={
+        "order":{
+            "order":"desc"
+        }
+    }
+    score={
+        "score":{
+            "order":"desc"
+        }
+    }
 
 
 
@@ -81,6 +91,10 @@ class CommodityDoc(MyElasticSearch):
                 tmp={}
                 tmp['type']='integer'
                 myjson[str(model_filed)]=tmp
+            elif model_filed_class=='FloatField':
+                tmp={}
+                tmp['type']='float'
+                myjson[str(model_filed)]=tmp
             elif model_filed_class == 'DateTimeField':
                 tmp={}
                 tmp['type']='date'
@@ -91,24 +105,39 @@ class CommodityDoc(MyElasticSearch):
         self.mappings = {"properties": myjson}
         super().set_mapping(mappings = self.mappings)
 
-    #TODO 引数後で追加,関数内部でdoc作成
     def insert_document(self,doc,id=None,):
         super().insert_document(doc=doc,id=id,)
 
-    def search(self,sort=created_at):
+
+    #TODO 検索アルゴリズム書く
+    def search(self,sort=created_at,word=""):
         query={
             "query": {
-                "bool":{
-                    "filter":{
-                        "term":{
-                            "is_active":"active"
-                        }
-                    }
+                "function_score": {
+                    "query": { 
+                        "bool":{
+                            "should":{
+                                "match":{
+                                    "title":word
+                                }
+                            },
+                            "filter":{
+                                "term":{
+                                    "is_active":"active"
+                                }
+                            }
+                        },
+                    },
+                    "boost": "5",
+                    "random_score": {}, 
+                    "boost_mode": "multiply"
                 }
-            },
-            "sort":sort
+            }
         }
+      
+        #sort=sort
         res = super().search(query=query)
+        print(res)
         return res["hits"]['hits']
     
 

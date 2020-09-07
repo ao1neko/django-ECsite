@@ -47,7 +47,6 @@ INSTALLED_APPS = [
     'django.contrib.sites',
     'allauth',
     'allauth.account',
-    'axes',
     'django_extensions',#runscript
     'stripe',
 ]
@@ -62,7 +61,6 @@ MIDDLEWARE = [
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 
     'debug_toolbar.middleware.DebugToolbarMiddleware',
-    'axes.middleware.AxesMiddleware',
 ]
 
 ROOT_URLCONF = 'ecsite.urls'
@@ -230,7 +228,6 @@ EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
 # django-allauthで利用するdjango.contrib.sitesを使うためにサイト識別用IDを設定
 SITE_ID = 1
 AUTHENTICATION_BACKENDS = (
-    'axes.backends.AxesBackend',
     'allauth.account.auth_backends.AuthenticationBackend',  # 一般ユーザー用(メールアドレス認証)
     'django.contrib.auth.backends.ModelBackend',  # 管理サイト用(ユーザー名認証)
 )
