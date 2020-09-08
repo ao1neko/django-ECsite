@@ -14,7 +14,7 @@
                 <strong>商品名</strong>
             </div>
             <div class="col-9">
-                {{ object.title }}
+                {{ myobject.title }}
             </div>
         </div>
         <hr>
@@ -23,7 +23,7 @@
                 <strong>値段</strong>
             </div>
             <div class="col-9">
-                {{ object.price }}円
+                {{ myobject.price }}円
             </div>
         </div>
         <hr>
@@ -32,7 +32,7 @@
                 <strong>商品概要</strong>
             </div>
             <div class="col-9">
-                {{ object.content|linebreaksbr }}
+                {{ myobject.content|linebreaksbr }}
             </div>
         </div>
 
@@ -44,8 +44,8 @@
                 <strong>サンプル写真</strong>
             </div>
             <div class="col-3">
-                {% if object.photo %}
-                    <img src="{{ object.photo.url }}" width="200" height="200"/>
+                {% if myobject.photo != '' %}
+                    <img src="{{ myobject.photo }}" width="200" height="200"/>
                 {% endif %}
             </div>
         </div>
@@ -68,9 +68,9 @@
 
       <button class="btn btn-success mt-5 mb-3" name="cart-button" href="" type="submit">カートに入れる数量を選択</button> 
       <button class="btn btn-success mt-5 mb-3" name="library-button" href="" type="submit">お気に入り</button> 
-      {% if object.user == user %}
+      {% if myobject.userid == user.id %}
 
-      <a class="btn btn-primary float-right mt-5 "  href="{% url 'ecsitecore:ecsite-update' object.pk %}">更新</a>
+      <a class="btn btn-primary float-right mt-5 "  href="{% url 'ecsitecore:ecsite-update' myobject.id %}">更新</a>
       
       <button class="btn btn-primary float-right mt-5 mr-2" href="" name="delete-button" type="submit">削除</button>
      

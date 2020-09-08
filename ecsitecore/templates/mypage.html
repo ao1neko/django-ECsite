@@ -15,21 +15,21 @@
         <div class="my-div-style w-100">
             <h2>お気に入り</h2>
             <hr>
-                {% for library in library_list %}
+                {% for library in mylibrary_list %}
                     <div class="row">
                         
                         <div class="col-3">
-                        <a href="{% url 'ecsitecore:commodity-detail' library.commodity.pk %}">
-                            <img src="{{ library.commodity.photo.url }}" width="150" height="150"/>
+                        <a href="{% url 'ecsitecore:commodity-detail' library.commoditykey %}">
+                            <img src="{{ library.photo }}" width="150" height="150"/>
                         </a>
                         </div>
                         <div class="col-6">
-                        <a href="{% url 'ecsitecore:commodity-detail' library.commodity.pk %}">
+                        <a href="{% url 'ecsitecore:commodity-detail' library.commoditykey %}">
                           <h2 class="post-title">
-                            {{ library.commodity.title }}
+                            {{ library.title }}
                           </h2>
                           <h4 class="post-subtitle">
-                            {{ library.commodity.price }}円
+                            {{ library.price }}円
                           </h4>
                         </a>
                     </div>

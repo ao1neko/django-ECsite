@@ -5,7 +5,7 @@ from django.core.validators import MaxValueValidator, MinValueValidator, RegexVa
 
 class Transaction(models.Model):
     user = models.ForeignKey(CustomUser, verbose_name='ユーザー', on_delete=models.PROTECT)#多対一
-    commoditykey = models.IntegerField(verbose_name='商品番号')
+    commoditykey = models.CharField(verbose_name='商品番号',max_length=20)
     created_at = models.DateTimeField(verbose_name='作成日時', blank=True, null=True, auto_now_add=True)
     num=models.IntegerField(verbose_name="数量", default=1)
 
@@ -18,7 +18,7 @@ class Transaction(models.Model):
 
 class Review(models.Model):
     user = models.ForeignKey(CustomUser, verbose_name='ユーザー', on_delete=models.PROTECT)#多対一
-    commoditykey = models.IntegerField(verbose_name='商品番号')
+    commoditykey = models.CharField(verbose_name='商品番号',max_length=20)
     content = models.TextField(verbose_name='内容', default="")
     score = models.IntegerField(verbose_name='スコア',validators=[MinValueValidator(1), MaxValueValidator(5)],default=3)
     created_at = models.DateTimeField(verbose_name='作成日時', blank=True, null=True, auto_now_add=True)
@@ -32,8 +32,8 @@ class Review(models.Model):
 
 class Cart(models.Model):
     user = models.ForeignKey(CustomUser, verbose_name='ユーザー', on_delete=models.PROTECT)#多対一
-    commoditykey = models.IntegerField(verbose_name='商品番号')
-    num = models.IntegerField(verbose_name='数量', default=0)
+    commoditykey = models.CharField(verbose_name='商品番号',max_length=20)
+    num = models.IntegerField(verbose_name='数量', default=0,validators=[MinValueValidator(1)])
     
     class Meta:
         verbose_name_plural = 'ショッピングカート'
@@ -41,7 +41,7 @@ class Cart(models.Model):
 
 class Library(models.Model):
     user = models.ForeignKey(CustomUser, verbose_name='ユーザー', on_delete=models.PROTECT)#多対一
-    commoditykey = models.IntegerField(verbose_name='商品番号')
+    commoditykey = models.CharField(verbose_name='商品番号',max_length=20)
 
     class Meta:
         verbose_name_plural = 'お気に入り'

@@ -7,8 +7,8 @@ from django.views import generic
 from django.shortcuts import redirect, render
 from django.template import RequestContext
 from django.core.validators import RegexValidator
+from django.db.models import Avg
 
-#TODO　elasticsearchコピー
 from .myfunctions import *
 from .elasticsearch.commoditydoc import CommodityDoc
 from .forms import CommodityCreateForm, CompanyCreateForm, UserCreateForm, CartCreateForm, ReviewCreateForm
@@ -42,7 +42,6 @@ class CommodityListView(generic.TemplateView):
         word=self.request.session.pop('words', None)
         self.request.session['words_store']=word
         type=self.request.session.pop('types',None)
-        print(word,type)
         if word==None:
             if type==None or type=="time":
                 context['mycommodity_list'] =  change_hits_list(commoditydoc.word_search())
@@ -76,39 +75,34 @@ class CommodityListView(generic.TemplateView):
 
 
 
-class commodityDetailView(generic.FormView,generic.edit.ModelFormMixin):
+class commodityDetailView(generic.FormView,):
     template_name = 'ecsite_detail.html'
-    form_class = CartCreateForm 
+    form_class = CartCreateForm
 
     def post(self, request, *args, **kwargs):
         if 'delete-button' in request.POST:
-            commoditydoc.update(id=self.kwargs['pk'],body={"is_active":"not_active"})
+            commoditydoc.update(id=self.kwargs['slug'],body={"is_active":"not_active"})
             messages.success(self.request, '商品を削除しました。')
             return redirect('ecsitecore:ecsite-mylist')   
         elif 'delete-review-button' in request.POST:
             Review.objects.filter(pk=request.POST['delete-review-button']).delete()
             messages.success(self.request, 'レビューを削除しました。')
-            return redirect(reverse_lazy('ecsitecore:commodity-detail', kwargs={'pk': self.kwargs['pk']}))
+            return redirect(reverse_lazy('ecsitecore:commodity-detail', kwargs={'slug': self.kwargs['slug']}))
         elif 'library-button' in request.POST:
-            Library.objects.get_or_create(user=request.user, commoditykey=self.kwargs['pk'])
+            Library.objects.get_or_create(user=request.user, commoditykey=self.kwargs['slug'])
             messages.success(self.request, 'お気に入りに追加しました。')
             return redirect('ecsitecore:mypage')   
         elif 'cart-button' in request.POST:
             form = self.get_form()
             if form.is_valid():
                 num=form.cleaned_data['num']
-                if num<=0:
-                    messages.error(self.request, '数量が間違っています')
-                    self.object = self.get_object()
-                    return self.form_invalid(form)
+                tmp=Cart.objects.filter(user=request.user, commoditykey=self.kwargs['slug'])
+                if tmp.count()==0:
+                    Cart.objects.create(user=request.user, commoditykey=self.kwargs['slug'],num=num)
                 else:
-                    tmp=Cart.objects.filter(user=request.user, commoditykey=self.kwargs['pk'])
-                    if tmp.count()==0:
-                        Cart.objects.create(user=request.user, commoditykey=self.kwargs['pk'],num=num)
-                    else:
-                        tmp.update(num=num)
-                    messages.success(self.request, 'カートに追加しました。')
-                    return redirect('ecsitecore:transaction')
+                    tmp.update(num=num)
+                messages.success(self.request, 'カートに追加しました。')
+                return redirect('ecsitecore:transaction')
             else:
                 return self.form_invalid(form)
         elif 'review-button' in request.POST:
@@ -118,37 +112,51 @@ class commodityDetailView(generic.FormView,generic.edit.ModelFormMixin):
                 # フォームに書き込んだ部分を取得する(保存しない)
                 rform_query = rform.save(commit=False)
                 rform_query.user = request.user
-                rform_query.commoditykey = self.kwargs['pk']
+                rform_query.commoditykey = self.kwargs['slug']
                 # 保存
                 rform_query.save()
+                score=Review.objects.filter(commoditykey=self.kwargs['slug']).aggregate(Avg('score'))
+                commoditydoc.update_document(id=self.kwargs['slug'],doc={"score":score})
+                messages.success(self.request, 'レビューを追加しました。')
+                return redirect(reverse_lazy('ecsitecore:commodity-detail', kwargs={'slug': self.kwargs['slug']}))
             else:
-                score=Review.objects.filter(commoditykey=self.kwargs['pk']).aggregate(Avg('score'))
-                commoditydoc.update(id=self.kwargs['pk'],doc={"score":score})
                 messages.error(self.request, 'スコアは1~5の値を入力して下さい')
-                return redirect(reverse_lazy('ecsitecore:commodity-detail', kwargs={'pk': self.kwargs['pk']}))
-            messages.success(self.request, 'レビューを追加しました。')
-            return redirect(reverse_lazy('ecsitecore:commodity-detail', kwargs={'pk': self.kwargs['pk']}))
-
+                return redirect(reverse_lazy('ecsitecore:commodity-detail', kwargs={'slug': self.kwargs['slug']}))
+            
                     
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context['review_list'] = Review.objects.filter(commoditykey=self.kwargs['pk']).order_by("created_at")
+        context['review_list'] = Review.objects.filter(commoditykey=self.kwargs['slug']).order_by("created_at")
         context['review_form'] = ReviewCreateForm()
-        #TODO commodity detail用データ作成
-
+        doc=commoditydoc.get_document(id=self.kwargs['slug'])
+        context['myobject']={
+            'title':doc['_source']['title'],
+            'price':doc['_source']['price'],
+            'content':doc['_source']['content'],
+            'photo':doc['_source']['photo'],
+            'userid':doc['_source']['userkey'],
+            'id':doc['_id'],
+        }
         return context
 
     
 
-class commodityUpdateView(LoginRequiredMixin,generic.TemplateView):
+class commodityUpdateView(LoginRequiredMixin,generic.FormView):
     template_name = 'ecsite_update.html'
     form_class = CommodityCreateForm
 
     def get_success_url(self):
-        return reverse_lazy('ecsitecore:commodity-detail', kwargs={'pk': self.kwargs['pk']})
+        return reverse_lazy('ecsitecore:commodity-detail', kwargs={'slug': self.kwargs['slug']})
 
     def form_valid(self, form):
+        doc={
+            "title":form.cleaned_data['title'],
+            'content':form.cleaned_data['content'],
+            'photo':"/media/"+form.cleaned_data['photo'],
+            'price':form.cleaned_data['price']
+        }
+        commoditydoc.update_document(doc=doc,id=self.kwargs['slug'])
         messages.success(self.request, '商品情報を更新しました。')
         return super().form_valid(form)
 
@@ -161,14 +169,9 @@ class commodityUpdateView(LoginRequiredMixin,generic.TemplateView):
 
 import stripe
 stripe.api_key = settings.STRIPE_SECRET_KEY
-class TransactionsView(LoginRequiredMixin, generic.ListView):
-    model=Cart
+class TransactionsView(LoginRequiredMixin, generic.TemplateView):
     template_name = "transaction.html"
     paginate_by = 10
-
-    def get_queryset(self):
-        cart = Cart.objects.filter(user=self.request.user)
-        return cart
 
     def post(self, request, *args, **kwargs):
         if "delete-button" in request.POST:
@@ -207,10 +210,22 @@ class TransactionsView(LoginRequiredMixin, generic.ListView):
     def get_context_data(self, **kwargs):
         """STRIPE_PUBLIC_KEYを渡したいだけ"""
         context = super().get_context_data(**kwargs)
+        mycart_list=[]
+        for cart in Cart.objects.filter(user=self.request.user):
+            commoditykey=cart.commoditykey
+            doc=commoditydoc.get_document(id=commoditykey)
+            tmp={}
+            tmp['commoditykey']=commoditykey
+            tmp['photo']=doc['_source']['photo']
+            tmp['title']=doc['_source']['title']
+            tmp['price']=doc['_source']['price']
+            tmp['num']=cart.num
+            mycart_list.append(tmp)
+        context['mycart_list'] = mycart_list
         context['publick_key'] = settings.STRIPE_PUBLIC_KEY
         sum=0 
         for carti in Cart.objects.filter(user=self.request.user):
-            sum+=commoditydoc.get_document(id=carti.commoditykey)["price"]*carti.num
+            sum+=commoditydoc.get_document(id=carti.commoditykey)["_source"]["price"]*carti.num
         context['price_amount']=sum 
         return context
 
@@ -220,19 +235,22 @@ class CommodityInquiryView(LoginRequiredMixin,generic.FormView):
     success_url = reverse_lazy('ecsitecore:ecsite-mylist')
 
     def form_valid(self, form):
-        #TODO formをelasticeにセーブ
-        form.save(commit=False)
+        commoditydoc.insert_document(userkey=self.request.user.id,title=form.cleaned_data['title'],content=form.cleaned_data['content'],photo=form.cleaned_data['photo']._get_name(),price=form.cleaned_data['price'])
         messages.success(self.request, '商品を陳列しました。')
+        #TODO 数秒待たないといけない,elasticsearchに書込みが終わってない?
+        # mylistのページに商品が表示されない
         return super().form_valid(form)
 
 
-class MyCommodityListView(LoginRequiredMixin, generic.ListView):
+class MyCommodityListView(LoginRequiredMixin, generic.TemplateView):
     template_name = 'ecsite_mylist.html'
     paginate_by = 10
 
-    def get_queryset(self):
-        commodities = commoditydoc.word_search()
-        return commodities
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context["commodities"]= change_hits_list(commoditydoc.word_search())
+        print(context['commodities'])
+        return context
 
 
 
@@ -248,7 +266,17 @@ class MyPageView(LoginRequiredMixin,generic.TemplateView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context['library_list'] = Library.objects.filter(user=self.request.user)
+        mylibrary_list=[]
+        for cart in Library.objects.filter(user=self.request.user):
+            commoditykey=cart.commoditykey
+            doc=commoditydoc.get_document(id=commoditykey)
+            tmp={}
+            tmp['commoditykey']=commoditykey
+            tmp['photo']=doc['_source']['photo']
+            tmp['title']=doc['_source']['title']
+            tmp['price']=doc['_source']['price']
+            mylibrary_list.append(tmp)
+        context['mylibrary_list'] = mylibrary_list
         context['transaction_list'] = Transaction.objects.filter(user=self.request.user)
         return context
     

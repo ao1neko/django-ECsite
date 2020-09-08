@@ -50,7 +50,7 @@ class CustomUser(AbstractUser):
     objects=UserManager()#ハンドラー
     USERNAME_FIELD='email'#一意な値にするフィールド名
     EMAIL_FIELD = 'email'#email用フィルード
-    REQUIRED_FIELDS = []#superuser作成時,必ず入力するフィールド
+    REQUIRED_FIELDS = ['username']#superuser作成時,必ず入力するフィールド
 
 
     #管理画面で'CustomUser'という名前で表示される

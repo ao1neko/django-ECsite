@@ -13,20 +13,20 @@
 <div class="container">
     <div class="row">
         <div class="my-div-style w-100">
-                {% for cart in cart_list %}
+                {% for cart in mycart_list %}
                     <div class="row">
                         <div class="col-3">
-                        <a href="{% url 'ecsitecore:commodity-detail' cart.commodity.pk %}">
-                        <img src="{{ cart.commodity.photo.url }}" width="150" height="150"/>
+                        <a href="{% url 'ecsitecore:commodity-detail' cart.commoditykey %}">
+                        <img src="{{ cart.photo }}" width="150" height="150"/>
                         </a>
                         </div>
                         <div class="col-6">
-                        <a href="{% url 'ecsitecore:commodity-detail' cart.commodity.pk %}">
+                        <a href="{% url 'ecsitecore:commodity-detail' cart.commoditykey %}">
                           <h2 class="post-title">
-                            {{ cart.commodity.title }}
+                            {{ cart.title }}
                           </h2>
                           <h4 class="post-subtitle">
-                            {{ cart.commodity.price }}円×{{ cart.num }}個
+                            {{ cart.price }}円×{{ cart.num }}個
                           </h4>
                         </a>
                         </div> 

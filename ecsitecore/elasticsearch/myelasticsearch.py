@@ -24,7 +24,7 @@ class MyElasticSearch():
     
     def get_document(self,id):
         res = self.es.get(index=self.index_name, id=id)
-        return res['result']
+        return res
 
     def delete_document(self,id):
         res = self.es.delete(index=self.index_name, id=id)

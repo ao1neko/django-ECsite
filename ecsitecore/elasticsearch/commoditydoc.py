@@ -27,13 +27,10 @@ class CommodityDoc(MyElasticSearch):
         }
     }
 
-
-
-    
-    def __init__(self):
+    def __init__(self,index_name='commodity'):
         self.mappings ={
             "properties": {
-                "user":{
+                "userkey":{
                     "type":"integer",
                 },
                 "title":{
@@ -66,7 +63,7 @@ class CommodityDoc(MyElasticSearch):
                 },
             }
         }
-        super().__init__(index_name="commodity")
+        super().__init__(index_name=index_name)
 
     def create_index(self):
         settings = {
@@ -101,7 +98,18 @@ class CommodityDoc(MyElasticSearch):
         super().create_index(body={"settings":settings,"mappings":self.mappings})
         
 
-    def insert_document(self,doc,id=None,):
+    def insert_document(self,userkey,title,price,content='',photo='',id=None,):
+        doc={
+            'userkey':userkey,
+            'title':title,
+            'content':content,
+            'photo':'/media/'+photo,
+            'price':price,
+            'order':0,
+            'score':3.0,
+            'is_active':'active',
+            'created_at':datetime.now(),
+        }
         super().insert_document(doc=doc,id=id,)
 
 
@@ -133,7 +141,7 @@ class CommodityDoc(MyElasticSearch):
       
         #sort=sort
         res = super().search(query=query)
-        print(res)
+        #print(res)
         return res["hits"]['hits']
     
 
