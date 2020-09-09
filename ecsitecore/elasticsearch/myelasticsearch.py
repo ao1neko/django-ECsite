@@ -35,7 +35,7 @@ class MyElasticSearch():
         return res['result']
 
     def update_document(self,doc,id):
-        res = self.es.update(index=self.index_name,body=doc,id=id)
+        res = self.es.update(index=self.index_name,body={"doc":doc},id=id)
         return res['result']
 
     def search(self,query={"query": {"match_all": {}}}):

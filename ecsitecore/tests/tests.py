@@ -54,15 +54,6 @@ class TestCommodityListView(LoggedInTestCase):
         self.assertRedirects(response, reverse_lazy('ecsitecore:commodity-list'))
         
 class TestCommodityDeatailView(LoggedInTestCase):
-    def test_review_success(self):
-        Review.objects.create(user=self.test_user,commoditykey="111",content='review test',score=4.0,id=3)
-        self.assertEqual(Review.objects.all().count(),1)
-        params={
-            'delete-review-button':3
-        }
-        response = self.client.post(reverse_lazy('ecsitecore:commodity-detail',kwargs={'slug': 3}),params)
-        self.assertEqual(Review.objects.all().count(),0)
-
     def test_library_success(self):
         self.assertEqual(Library.objects.all().count(),0)
         params={
@@ -162,7 +153,7 @@ class TestUserUpdateView(LoggedInTestCase):
             'email':'aoneko2@exampl.com',
             'profile_text':'test',
         }
-        response = self.client.post(reverse_lazy('ecsitecore:profile-updates',kwargs={'slug':1}),params)
+        response = self.client.post(reverse_lazy('ecsitecore:profile-updates',kwargs={'slug':"testuser"}),params)
         self.assertRedirects(response,reverse_lazy('ecsitecore:profile'))
 
     def test_user_fail(self):
@@ -170,7 +161,7 @@ class TestUserUpdateView(LoggedInTestCase):
             'email':'aoneko2@exampl.com',
             'profile_text':'test',
         }
-        response = self.client.post(reverse_lazy('ecsitecore:profile-updates',kwargs={'slug':1}),params)
+        response = self.client.post(reverse_lazy('ecsitecore:profile-updates',kwargs={'slug':'testuser'}),params)
         self.assertFormError(response, 'form', 'username', 'このフィールドは必須です。')
 
 class TestMyPageView(LoggedInTestCase):

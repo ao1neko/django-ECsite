@@ -27,6 +27,8 @@ class CommodityDoc(MyElasticSearch):
         }
     }
 
+
+
     def __init__(self,index_name='commodity'):
         self.mappings ={
             "properties": {
