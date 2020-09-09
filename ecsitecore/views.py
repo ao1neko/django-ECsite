@@ -126,8 +126,6 @@ class commodityDetailView(generic.FormView,):
             else:
                 messages.error(self.request, 'スコアは1~5の値を入力して下さい')
                 return redirect(reverse_lazy('ecsitecore:commodity-detail', kwargs={'slug': self.kwargs['slug']}))
-            
-                    
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
