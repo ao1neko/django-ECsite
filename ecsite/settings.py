@@ -49,6 +49,8 @@ INSTALLED_APPS = [
     'allauth.account',
     'django_extensions',#runscript
     'stripe',
+
+    'django_celery_results',
 ]
 
 MIDDLEWARE = [
@@ -97,6 +99,10 @@ DATABASES = {
     },
 }
 
+
+#celery
+CELERY_BROKER_URL = os.environ.get('REDIS_URL', 'redis://localhost:6379/1')
+CELERY_RESULT_BACKEND = "django-db"
 
 
 CACHES = {
