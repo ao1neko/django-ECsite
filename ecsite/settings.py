@@ -169,8 +169,8 @@ LOGGING = {
             'level': 'INFO',
         },
         # diaryアプリケーションが利用するロガー
-        'diary': {
-            'handlers': ['console'],
+        'ecsitecore': {
+            'handlers': ['console','file'],
             'level': 'DEBUG',
         },
     },
@@ -181,6 +181,12 @@ LOGGING = {
             'level': 'DEBUG',
             'class': 'logging.StreamHandler',
             'formatter': 'dev'
+        },
+        'file': {  # ファイルに出力する
+            'level': 'DEBUG',  # DEBUG以上の場合出力
+            'class': 'logging.FileHandler',  # ログを出力するクラス
+            'filename': os.path.join(BASE_DIR, 'django.log'),
+            'formatter': 'simple',  # どの出力フォーマットで出すかを名前で指定
         },
     },
 
@@ -193,6 +199,9 @@ LOGGING = {
                 '%(pathname)s(Line:%(lineno)d)',
                 '%(message)s'
             ])
+        },
+        'simple': {
+            'format': '%(asctime)s %(levelname)s %(message)s'
         },
     }
 }

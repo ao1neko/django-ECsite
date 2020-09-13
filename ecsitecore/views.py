@@ -54,8 +54,7 @@ class CommodityListView(generic.TemplateView):
             elif type == 'score':
                 context['mycommodity_list'] =  change_hits_list(commoditydoc.word_search(sort=CommodityDoc.score))
         else:
-            
-            logger.info(word)
+            logger.info('{0}:{1}'.format(self.request.user,word))
             context['mycommodity_list'] =  change_hits_list(commoditydoc.word_search(sort=CommodityDoc.score,word=word))
         return context
 
