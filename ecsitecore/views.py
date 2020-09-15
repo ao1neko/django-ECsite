@@ -1,4 +1,5 @@
 import logging
+import time
 from django.conf import settings
 from django.contrib import messages
 from django.contrib.auth.mixins import LoginRequiredMixin
@@ -9,6 +10,7 @@ from django.template import RequestContext
 from django.core.validators import RegexValidator
 from django.db.models import Avg
 
+from ecsite.tasks import *
 from .myfunctions import *
 from .elasticsearch.commoditydoc import CommodityDoc
 from .forms import CommodityCreateForm, CompanyCreateForm, UserCreateForm, CartCreateForm, ReviewCreateForm
@@ -52,6 +54,7 @@ class CommodityListView(generic.TemplateView):
             elif type == 'score':
                 context['mycommodity_list'] =  change_hits_list(commoditydoc.word_search(sort=CommodityDoc.score))
         else:
+            logger.info('{0}:{1}'.format(self.request.user,word))
             context['mycommodity_list'] =  change_hits_list(commoditydoc.word_search(sort=CommodityDoc.score,word=word))
         return context
 
@@ -81,7 +84,7 @@ class commodityDetailView(generic.FormView,):
     def post(self, request, *args, **kwargs):
         print(request.POST)
         if 'delete-button' in request.POST:
-            commoditydoc.update_document(id=self.kwargs['slug'],body={"is_active":"not_active"})
+            commoditydoc.update_document(id=self.kwargs['slug'],doc={"is_active":"not_active"})
             Cart.objects.filter(commoditykey=self.kwargs['slug']).delete()
             Library.objects.filter(commoditykey=self.kwargs['slug']).delete()
             messages.success(self.request, '商品を削除しました。')
@@ -126,8 +129,6 @@ class commodityDetailView(generic.FormView,):
             else:
                 messages.error(self.request, 'スコアは1~5の値を入力して下さい')
                 return redirect(reverse_lazy('ecsitecore:commodity-detail', kwargs={'slug': self.kwargs['slug']}))
-            
-                    
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -249,7 +250,7 @@ class CommodityInquiryView(LoginRequiredMixin,generic.FormView):
         commoditydoc.insert_document(userkey=self.request.user.id,title=form.cleaned_data['title'],content=form.cleaned_data['content'],photo=form.cleaned_data['photo']._get_name(),price=form.cleaned_data['price'])
         messages.success(self.request, '商品を陳列しました。')
         #TODO 数秒待たないといけない,elasticsearchに書込みが終わってない?
-        # mylistのページに商品が表示されない
+        time.sleep(1)
         return super().form_valid(form)
 
 
